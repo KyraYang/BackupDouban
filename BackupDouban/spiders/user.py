@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
+import re
 
 
 class UserSpider(scrapy.Spider):
@@ -15,7 +16,7 @@ class UserSpider(scrapy.Spider):
 
     def start_requests(self):
         yield scrapy.Request(
-            url="https://douban.com/people/{}/".format(self.account_name),
+            url="https://www.douban.com/people/{}/".format(self.account_name),
             callback=self.parse,
             headers=self.headers,
             cookies=self.cookies,
@@ -34,13 +35,33 @@ class UserSpider(scrapy.Spider):
             done_url = response.xpath(
                 '//div[@id="book"]/h2/span/a[contains(@href, "collect")]/@href'
             ).get()
-        if doing_url:
+        if done_url:
             yield scrapy.Request(
-                url=doing_url,
-                callback=self.parse_doing,
+                url=done_url,
+                callback=self.parse_done,
                 headers=self.headers,
                 cookies=self.cookies,
             )
 
-    def parse_doing(self, response):
-        return
+    def list_books_parse(self, book, status):
+        title = book.xpath("normalize-space(.//h2/a/text())").get()
+        subtitle = book.xpath(".//h2/a/span/text()").get()
+        if subtitle:
+            title = title + subtitle
+        book_url = book.xpath(".//h2/a/@href").get()
+        douban_id = re.search(r"\d+", book_url).group(0)
+        return {
+            "title": title,
+            "info": book.xpath("normalize-space(.//div[@class='pub']/text())").get(),
+            "shot_note": book.xpath(
+                "normalize-space(.//div[@class='short-note']/p/text())"
+            ).get(),
+            "douban_id": douban_id,
+            "status": status,
+        }
+
+    def parse_done(self, response):
+        books = response.xpath('//li[@class="subject-item"]/div[@class="info"]')
+        for book in books:
+            book_dict = self.list_books_parse(book, "done")
+            yield book_dict

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-from BackupDouban.model import User, DoubanBooks, db_connect, create_channel_table
+from BackupDouban.model import (
+    User,
+    DoubanBook,
+    UserBook,
+    db_connect,
+    create_channel_table,
+)
 from sqlalchemy.orm import sessionmaker
 
 # Define your item pipelines here
@@ -18,6 +24,14 @@ class SQLlitePipeline(object):
     def process_item(self, item, spider):
         user = User(user=item.get("name"))
         self.session.add(user)
+        user_book = UserBook(
+            title=item.get("title"),
+            info=item.get("info"),
+            shot_note=item.get("shot_note"),
+            user_id=user.id,
+            douban_id=item.get("douban_id"),
+        )
+        self.session.add(user_book)
         self.session.commit()
         return item
 
