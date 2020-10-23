@@ -2,8 +2,8 @@
 import scrapy
 
 
-class UserSpider(scrapy.Spider):
-    name = "user"
+class WishesBookSpider(scrapy.Spider):
+    name = "wishes_book"
     allowed_domains = ["www.douban.com"]
 
     headers = {
@@ -15,28 +15,13 @@ class UserSpider(scrapy.Spider):
 
     def start_requests(self):
         yield scrapy.Request(
-            url="https://douban.com/people/{}/".format(self.account_name),
+            url=self.url,
             callback=self.parse,
             headers=self.headers,
             cookies=self.cookies,
         )
 
     def parse(self, response):
-        name = response.xpath("normalize-space(//h1/text())").get()
-        if name:
-            doing_url = response.xpath(
-                '//div[@id="book"]/h2/span/a[contains(@href, "/do")]/@href'
-            ).get()
-            wishes_url = response.xpath(
-                '//div[@id="book"]/h2/span/a[contains(@href, "wish")]/@href'
-            ).get()
-            done_url = response.xpath(
-                '//div[@id="book"]/h2/span/a[contains(@href, "collect")]/@href'
-            ).get()
-
-        return {
-            "name": name,
-            "doing": doing_url,
-            "wishes": wishes_url,
-            "done": done_url,
-        }
+        books = response.xpath('//li[@class="subject-item"]')
+        for book in books:
+            yield {"title": book.xpath("normalize-space(.//h2/a/text())").get()}
