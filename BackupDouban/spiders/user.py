@@ -4,7 +4,7 @@ import scrapy
 
 class UserSpider(scrapy.Spider):
     name = "user"
-    allowed_domains = ["www.douban.com"]
+    allowed_domains = ["douban.com"]
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
@@ -23,6 +23,7 @@ class UserSpider(scrapy.Spider):
 
     def parse(self, response):
         name = response.xpath("normalize-space(//h1/text())").get()
+        yield {"name": self.account_name}
         if name:
             doing_url = response.xpath(
                 '//div[@id="book"]/h2/span/a[contains(@href, "/do")]/@href'
@@ -33,10 +34,13 @@ class UserSpider(scrapy.Spider):
             done_url = response.xpath(
                 '//div[@id="book"]/h2/span/a[contains(@href, "collect")]/@href'
             ).get()
+        if doing_url:
+            yield scrapy.Request(
+                url=doing_url,
+                callback=self.parse_doing,
+                headers=self.headers,
+                cookies=self.cookies,
+            )
 
-        return {
-            "name": name,
-            "doing": doing_url,
-            "wishes": wishes_url,
-            "done": done_url,
-        }
+    def parse_doing(self, response):
+        return

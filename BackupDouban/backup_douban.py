@@ -31,11 +31,11 @@ def crawl_wishes_books(url):
         result.append(item)
 
     dispatcher.connect(crawler_reciever, signal=signals.item_scraped)
-    user = CrawlerProcess(get_project_settings())
-    user.crawl(WishesBookSpider, url=url)
-    user.start()
+    wishes_books = CrawlerProcess(get_project_settings())
+    wishes_books.crawl(WishesBookSpider, url=url)
+    wishes_books.start()
 
-
+ 
 @click.command()
 @click.argument("account_name")
 def main(account_name):
