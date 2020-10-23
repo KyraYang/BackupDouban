@@ -15,16 +15,23 @@ class UserSpider(scrapy.Spider):
 
     def start_requests(self):
         yield scrapy.Request(
-            url="https://douban.com/people/{}/".format(self.fieldname),
+            url="https://douban.com/people/{}/".format(self.account_name),
             callback=self.parse,
             headers=self.headers,
             cookies=self.cookies,
         )
 
     def parse(self, response):
-        yield {"name": response.xpath("normalize-space(//h1/text())").get()}
-        doing_url = response.xpath('(//div[@id="book"]/h2/span/a/@href)[1]').get()
-        wishes_url = response.xpath('(//div[@id="book"]/h2/span/a/@href)[2]').get()
-        done_url = response.xpath('(//div[@id="book"]/h2/span/a/@href)[3]').get()
-        if doing_url:
-            yield {"在读": doing_url, "想读": wishes_url, "读过": done_url}
+        name = response.xpath("normalize-space(//h1/text())").get()
+        if name:
+            doing_url = response.xpath(
+                '//div[@id="book"]/h2/span/a[contains(@href, "/do")]'
+            ).get()
+            wishes_url = response.xpath(
+                '//div[@id="book"]/h2/span/a[contains(@href, "wish")]'
+            ).get()
+            done_url = response.xpath(
+                '//div[@id="book"]/h2/span/a[contains(@href, "collect")]'
+            ).get()
+
+        return {"name": name, "在读": doing_url, "想读": wishes_url, "读过": done_url}
