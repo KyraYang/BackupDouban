@@ -22,8 +22,7 @@ def create_channel_table(engine):
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user = Column(String(120), nullable=False, unique=True)
+    user = Column(String(120), primary_key=True)
     books = relationship("UserBook")
 
 
@@ -46,7 +45,7 @@ class UserBook(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(120), nullable=False)
     info = Column(String(120), nullable=False)
-    shot_note = Column(String(500), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    short_note = Column(String(500), nullable=False)
+    user_id = Column(String(120), ForeignKey("users.user"))
     douban_id = Column(Integer, ForeignKey("douban_books.id"))
     status = Column(String(120), nullable=False)

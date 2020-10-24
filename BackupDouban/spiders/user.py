@@ -23,9 +23,9 @@ class UserSpider(scrapy.Spider):
         )
 
     def parse(self, response):
-        name = response.xpath("normalize-space(//h1/text())").get()
-        yield {"name": self.account_name}
-        if name:
+        account = response.xpath("normalize-space(//h1/text())").get()
+        if account:
+            yield {"user_name": self.account_name}
             doing_url = response.xpath(
                 '//div[@id="book"]/h2/span/a[contains(@href, "/do")]/@href'
             ).get()
@@ -35,6 +35,20 @@ class UserSpider(scrapy.Spider):
             done_url = response.xpath(
                 '//div[@id="book"]/h2/span/a[contains(@href, "collect")]/@href'
             ).get()
+        if doing_url:
+            yield scrapy.Request(
+                url=doing_url,
+                callback=self.parse_doing,
+                headers=self.headers,
+                cookies=self.cookies,
+            )
+        if wishes_url:
+            yield scrapy.Request(
+                url=wishes_url,
+                callback=self.parse_wishes,
+                headers=self.headers,
+                cookies=self.cookies,
+            )
         if done_url:
             yield scrapy.Request(
                 url=done_url,
@@ -51,17 +65,60 @@ class UserSpider(scrapy.Spider):
         book_url = book.xpath(".//h2/a/@href").get()
         douban_id = re.search(r"\d+", book_url).group(0)
         return {
+            "name": self.account_name,
             "title": title,
             "info": book.xpath("normalize-space(.//div[@class='pub']/text())").get(),
-            "shot_note": book.xpath(
+            "short_note": book.xpath(
                 "normalize-space(.//div[@class='short-note']/p/text())"
             ).get(),
             "douban_id": douban_id,
             "status": status,
         }
 
+    def next_page(self, response):
+        next_page = response.xpath('//span[@class="next"]/a/@href').get()
+        if not next_page:
+            return
+        return f"https://book.douban.com{next_page}"
+
+    def parse_doing(self, response):
+        books = response.xpath('//li[@class="subject-item"]/div[@class="info"]')
+        for book in books:
+            book_dict = self.list_books_parse(book, "doing")
+            yield book_dict
+        next_page = self.next_page(response)
+        if next_page:
+            yield scrapy.Request(
+                url=next_page,
+                callback=self.parse_doing,
+                headers=self.headers,
+                cookies=self.cookies,
+            )
+
+    def parse_wishes(self, response):
+        books = response.xpath('//li[@class="subject-item"]/div[@class="info"]')
+        for book in books:
+            book_dict = self.list_books_parse(book, "wishes")
+            yield book_dict
+        next_page = self.next_page(response)
+        if next_page:
+            yield scrapy.Request(
+                url=next_page,
+                callback=self.parse_wishes,
+                headers=self.headers,
+                cookies=self.cookies,
+            )
+
     def parse_done(self, response):
         books = response.xpath('//li[@class="subject-item"]/div[@class="info"]')
         for book in books:
             book_dict = self.list_books_parse(book, "done")
             yield book_dict
+        next_page = self.next_page(response)
+        if next_page:
+            yield scrapy.Request(
+                url=next_page,
+                callback=self.parse_done,
+                headers=self.headers,
+                cookies=self.cookies,
+            )
