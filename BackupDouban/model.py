@@ -16,8 +16,8 @@ def db_connect():
 
 
 def create_channel_table(engine):
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
+    Base.metadata.drop_all(bind=engine, tables=[User.__table__, UserBook.__table__])
+    Base.metadata.create_all(engine, checkfirst=True)
 
 
 class User(Base):
@@ -32,11 +32,16 @@ class DoubanBook(Base):
     title = Column(String(120), nullable=False)
     author = Column(String(120), nullable=False)
     publisher = Column(String(120), nullable=False)
-    translators = Column(String(120), nullable=False)
+    original_name = Column(String(120), nullable=False)
+    translator = Column(String(120), nullable=False)
     publication_year = Column(String(120), nullable=False)
     pages = Column(String(120), nullable=False)
-    bingding = Column(String(120), nullable=False)
+    price = Column(String(120), nullable=False)
+    binding = Column(String(120), nullable=False)
     isbn = Column(String(120), nullable=False)
+    unified_number = Column(String(120), nullable=False)
+    intro = Column(String(500), nullable=False)
+
     userbook = relationship("UserBook")
 
 

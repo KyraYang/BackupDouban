@@ -65,8 +65,9 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    "BackupDouban.pipelines.StartSQLlitePipeline": 200,
-    "BackupDouban.pipelines.SQLlitePipeline": 300,
+    "BackupDouban.pipelines.StartSQLlitePipeline": 100,
+    "BackupDouban.pipelines.DoubanBookPipline": 200,
+    "BackupDouban.pipelines.UserBookPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -84,7 +85,7 @@ AUTOTHROTTLE_ENABLED = True
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-# HTTPCACHE_ENABLED = True
+HTTPCACHE_ENABLED = True
 # HTTPCACHE_EXPIRATION_SECS = 0
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
