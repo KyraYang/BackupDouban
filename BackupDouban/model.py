@@ -4,9 +4,12 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
+    DateTime,
+    SmallInteger,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -24,6 +27,8 @@ class User(Base):
     __tablename__ = "users"
     user = Column(String(120), primary_key=True)
     books = relationship("UserBook")
+    created = Column(DateTime, default=datetime.now())
+    updated = Column(DateTime, onupdate=datetime.now(), default=datetime.now())
 
 
 class DoubanBook(Base):
@@ -41,7 +46,8 @@ class DoubanBook(Base):
     isbn = Column(String(120), nullable=False)
     unified_number = Column(String(120), nullable=False)
     intro = Column(String(500), nullable=False)
-
+    created = Column(DateTime, default=datetime.now())
+    updated = Column(DateTime, onupdate=datetime.now(), default=datetime.now())
     userbook = relationship("UserBook")
 
 
@@ -49,8 +55,11 @@ class UserBook(Base):
     __tablename__ = "user_books"
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(120), nullable=False)
-    info = Column(String(120), nullable=False)
+    rating = Column(SmallInteger, nullable=False)
+    added_date = Column(String(120), nullable=False)
     short_note = Column(String(500), nullable=False)
     user_id = Column(String(120), ForeignKey("users.user"))
     douban_id = Column(Integer, ForeignKey("douban_books.id"))
     status = Column(String(120), nullable=False)
+    created = Column(DateTime, default=datetime.now())
+    updated = Column(DateTime, onupdate=datetime.now(), default=datetime.now())

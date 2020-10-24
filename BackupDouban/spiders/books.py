@@ -23,18 +23,20 @@ class BooksSpider(scrapy.Spider):
         )
 
     def parse(self, response):
+        print(response.body)
         account = response.xpath("normalize-space(//h1/text())").get()
-        if account:
-            yield {"user_name": self.account_name}
-            doing_url = response.xpath(
-                '//div[@id="book"]/h2/span/a[contains(@href, "/do")]/@href'
-            ).get()
-            wishes_url = response.xpath(
-                '//div[@id="book"]/h2/span/a[contains(@href, "wish")]/@href'
-            ).get()
-            done_url = response.xpath(
-                '//div[@id="book"]/h2/span/a[contains(@href, "collect")]/@href'
-            ).get()
+        if not account:
+            return "No this account."
+        yield {"user_name": self.account_name}
+        doing_url = response.xpath(
+            '//div[@id="book"]/h2/span/a[contains(@href, "/do")]/@href'
+        ).get()
+        wishes_url = response.xpath(
+            '//div[@id="book"]/h2/span/a[contains(@href, "wish")]/@href'
+        ).get()
+        done_url = response.xpath(
+            '//div[@id="book"]/h2/span/a[contains(@href, "collect")]/@href'
+        ).get()
         if doing_url:
             yield scrapy.Request(
                 url=doing_url,
@@ -64,7 +66,9 @@ class BooksSpider(scrapy.Spider):
             title = title + subtitle
         book_url = book.xpath(".//h2/a/@href").get()
         douban_id = re.search(r"\d+", book_url).group(0)
-
+        rating = book.xpath('.//span[contains(@class, "rating")]/@class').get()
+        date = book.xpath('.//span[@class="date"]/text()').get()
+        added_date = date.split()[0]
         from BackupDouban.model import (
             DoubanBook,
             db_connect,
@@ -80,7 +84,8 @@ class BooksSpider(scrapy.Spider):
         return {
             "name": self.account_name,
             "title": title,
-            "info": book.xpath("normalize-space(.//div[@class='pub']/text())").get(),
+            "rating": rating[6] if rating else "",
+            "added_date": added_date,
             "short_note": book.xpath(
                 "normalize-space(.//div[@class='short-note']/p/text())"
             ).get(),

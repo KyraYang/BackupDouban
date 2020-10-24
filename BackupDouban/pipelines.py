@@ -49,17 +49,17 @@ class DoubanBookPipline(object):
         douban_book = DoubanBook(
             id=item.get("id"),
             title=item.get("book_title"),
-            author=dumps(item.get("author")),
+            author=dumps(item.get("author"),ensure_ascii=False),
             publisher=item.get("publisher"),
             original_name=item.get("original_name"),
-            translator=dumps(item.get("translator")),
+            translator=dumps(item.get("translator"),ensure_ascii=False),
             publication_year=item.get("publication_year"),
             pages=item.get("pages"),
             price=item.get("price"),
             binding=item.get("binding"),
             isbn=item.get("isbn"),
             unified_number=item.get("unified_number"),
-            intro=dumps(item.get("intro")),
+            intro=dumps(item.get("intro"),ensure_ascii=False),
         )
         self.session.add(douban_book)
         self.session.commit()
@@ -81,7 +81,8 @@ class UserBookPipeline(object):
             return item
         user_book = UserBook(
             title=title,
-            info=item.get("info"),
+            rating=item.get("rating"),
+            added_date=item.get("added_date"),
             short_note=item.get("short_note"),
             user_id=item.get("name"),
             douban_id=item.get("douban_id"),
