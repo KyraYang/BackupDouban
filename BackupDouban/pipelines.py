@@ -46,20 +46,24 @@ class DoubanBookPipline(object):
         isbn = item.get("isbn")
         if not isbn:
             return item
+        author = [a.replace("\n            ", "").strip() for a in item.get("author")]
+        translator = [
+            a.replace("\n            ", "").strip() for a in item.get("translator")
+        ]
         douban_book = DoubanBook(
             id=item.get("id"),
             title=item.get("book_title"),
-            author=dumps(item.get("author"),ensure_ascii=False),
+            author=dumps(author, ensure_ascii=False),
             publisher=item.get("publisher"),
             original_name=item.get("original_name"),
-            translator=dumps(item.get("translator"),ensure_ascii=False),
+            translator=dumps(translator, ensure_ascii=False),
             publication_year=item.get("publication_year"),
             pages=item.get("pages"),
             price=item.get("price"),
             binding=item.get("binding"),
             isbn=item.get("isbn"),
             unified_number=item.get("unified_number"),
-            intro=dumps(item.get("intro"),ensure_ascii=False),
+            intro=dumps(item.get("intro"), ensure_ascii=False),
         )
         self.session.add(douban_book)
         self.session.commit()

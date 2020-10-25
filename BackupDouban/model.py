@@ -19,7 +19,7 @@ def db_connect():
 
 
 def create_channel_table(engine):
-    Base.metadata.drop_all(bind=engine, tables=[User.__table__, UserBook.__table__])
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(engine, checkfirst=True)
 
 

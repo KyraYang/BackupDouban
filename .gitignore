@@ -8,3 +8,7 @@
 BackupDouban/spiders/__pycache__/
 
 BackupDouban/__pycache__/
+
+BackupDouban/books.xlsx
+
+*.xlsx

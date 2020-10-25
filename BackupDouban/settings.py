@@ -52,9 +52,11 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#     "scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware": 300,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    "scrapy_fake_useragent.middleware.RandomUserAgentMiddleware": 400,
+    "scrapy_fake_useragent.middleware.RetryUserAgentMiddleware": 401,
+    "scrapy.downloadermiddlewares.retry.RetryMiddleware": 500,
+}
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
 # EXTENSIONS = {
@@ -89,3 +91,11 @@ HTTPCACHE_EXPIRATION_SECS = 3600
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+FAKEUSERAGENT_PROVIDERS = [
+    "scrapy_fake_useragent.providers.FakeUserAgentProvider",  # this is the first provider we'll try
+    "scrapy_fake_useragent.providers.FakerProvider",  # if FakeUserAgentProvider fails, we'll use faker to generate a user-agent string for us
+    "scrapy_fake_useragent.providers.FixedUserAgentProvider",  # fall back to USER_AGENT value
+]
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"
+FAKE_USERAGENT_RANDOM_UA_TYPE = "chrome"
